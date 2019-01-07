@@ -9,6 +9,7 @@
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Luckiest+Guy" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Lato|Montserrat" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 
     <!-- CSS -->
     <link rel="stylesheet" type="text/css" href="public/style.css">
@@ -16,23 +17,77 @@
 <body>
 <div id="app">
     <div class="header">
-        <h1>Vue.js Poster Store</h1>
+        <div class="header-top">
+          <h1>Another Vue - Posters</h1>
+          <div class="mycart" v-on:click="showCart()">
+            <p class="cart-amount" v-if="cart.length > 0">{{ amount }}</p>
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+
+        </div>
+        <form class="searchbar" v-on:submit.prevent="onSubmit">
+          <input type="text" name="search-term" value="search-term" v-model="newSearch" placeholder="Search for Poster">
+          <input type="submit" name="search" value="search" class="btn">
+        </form>
     </div>
     <div class="main">
         <div class="products">
-            <p>Products go here.</p>
-        </div>
-        <div class="cart">
-            <h2>Shopping Cart</h2>
-            <div>
-                No items in the cart.
+          <div class="search-results">
+          <div v-if="loading">
+            loading...
+          </div>
+          <span v-if="items.length > 0 && !loading">
+            found {{ items.length }} results for {{ lastSearch }}
+          </span>
+          </div>
+          <div class="product" v-for="(item, index) in items">
+            <div class="product-image">
+              <img v-bind:src="item.link" v-bind:alt="item.topic">
             </div>
+            <div>
+              <h4 class="product-title">
+                {{ item.title }}
+              </h4>
+              <div class="product-action">
+                <p>Price: <strong>{{ price | currency }}</strong></p>
+                <button v-on:click="addItem(index)" class="btn add-to-cart"><i class="fas fa-shopping-cart"></i></button>
+              </div>
+            </div>
+          </div>
+          <div id="product-list-bottom"></div>
+        </div>
+
+
+        <div class="cart" v-if="cartOpen">
+            <h2>Shopping Cart</h2>
+              <transition-group name="fade" tag="ul">
+                <li class="cart-item" v-for="(item, index) in cart" v-bind:key="item.id">
+                    <div class="product-image">
+                      <img v-bind:src="item.link" v-bind:alt="item.topic">
+                    </div>
+                    <div>
+                      {{ item.title | shorten }}
+                      <span class="item-qty">{{ item.price | currency }} x {{ item.qty }}</span>
+                      <button class="btn" v-on:click="inc(item)" type="button" name="inc-button">+</button>
+                      <button class="btn" v-on:click="dec(item)" type="button" name="dec-button">-</button>
+                    </div>
+                </li>
+              </transition-group>
+            <transition name="fade">
+              <div v-if="cart.length > 0">
+                <div>Total: {{ total | currency }}</div>
+              </div>
+            </transition>
+            <div v-if="cart.length === 0"class="empty-cart">No items in the cart.</div>
         </div>
     </div>
 </div>
 
 <!-- Scripts -->
 <script src="/reload/reload.js"></script>
+<script src="/node_modules/vue/dist/vue.min.js"></script>
+<script src="/node_modules/vue-resource/dist/vue-resource.min.js"></script>
+<script src="/node_modules/scrollmonitor/scrollMonitor.js"></script>
 <script type="text/javascript" src="public/script.js"></script>
 
 </body>
